@@ -91,7 +91,7 @@ module.exports = {
     output: {
         filename: 'bundle.js',
         path: path.resolve(__dirname, './dist'),
-        publicPath: 'dist/'
+        publicPath: 'dist/'                       // path to look for files imported by bundles
     },
     mode: 'none',
     module: {
@@ -114,3 +114,104 @@ module.exports = {
 };
 ```
 
+### Loaders
+* We use loaders to tell webpack how to use provided files.
+* There are no in built loaders, we need to npm install loaders to utillize them
+***npm i -D style-loader css-loader sass-loader***
+BELOW CODE WILL ADD SCSS styles TO HEAD SECTION In HTML
+```js
+//indesx.js
+import HelloWorldButton from './components/hello-world-button/hello-world-button.js';
+
+const helloWorldButton = new HelloWorldButton();
+helloWorldButton.render();
+
+/////////////////////  hello-world-button.js  //////////////////////////////////////////////////
+import './hello-world-button.scss';
+
+class HelloWorldButton {
+    render() {
+        const button = document.createElement('button');
+        const body = document.querySelector('body');
+        button.innerHTML = 'Hello world';
+        button.onclick = function () {
+            const p = document.createElement('p');
+            p.innerHTML = 'Hello world';
+            p.classList.add('hello-world-text');
+            body.appendChild(p);
+        }
+        button.classList.add('hello-world-button');
+        body.appendChild(button);
+    }
+}
+
+export default HelloWorldButton;
+```
+```js
+$font-size: 20px;
+$button-background-color: green;
+$button-font-color: white;
+$text-font-color: red;
+
+.hello-world-button {
+    font-size: $font-size;
+    padding: 7px 15px;
+    background: $button-background-color;
+    color: $button-font-color;
+    outline: none;
+}
+
+.hello-world-text {
+    color: $text-font-color;
+    font-weight: bold;
+}
+```
+```js
+const path = require('path');
+
+module.exports = {
+    entry: './src/index.js',
+    output: {
+        filename: 'bundle.js',
+        path: path.resolve(__dirname, './dist'),
+        publicPath: 'dist/'
+    },
+    mode: 'none',
+    module: {
+        rules: [
+            {
+                test: /\.(png|jpg)$/,
+                type: 'asset',
+                parser: {
+                    dataUrlCondition: {
+                        maxSize: 3 * 1024
+                    }
+                }
+            },
+            {
+                test: /\.txt/,
+                type: 'asset/source'
+            },
+            {
+                test: /\.css$/,
+                use: [
+                    'style-loader', 'css-loader'
+                ]
+            },
+            {
+                test: /\.scss$/,
+                use: [
+                    'style-loader', 'css-loader', 'sass-loader'
+                ]
+            }
+        ]
+    }
+};
+```
+ 
+### Babel
+* It is third party library that is mainly used to convert ECMAScript 2015+ code into a backwards compatible version of JavaScript in current and older browsers or environments.
+* Transform syntax
+* Polyfill features that are missing in your target environment (through a third-party polyfill such as core-js)
+* Source code transformations (codemods)
+* Babel can convert JSX syntax  (add @babel/preset-react to your Babel configuration.)
