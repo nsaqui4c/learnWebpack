@@ -215,3 +215,58 @@ module.exports = {
 * Polyfill features that are missing in your target environment (through a third-party polyfill such as core-js)
 * Source code transformations (codemods)
 * Babel can convert JSX syntax  (add @babel/preset-react to your Babel configuration.)
+* npm install @babel/core babel-loader @babel/preset-env @babel/plugin-proposal-class-properties --save-dev
+```js
+const path = require('path');
+
+module.exports = {
+    entry: './src/index.js',
+    output: {
+        filename: 'bundle.js',
+        path: path.resolve(__dirname, './dist'),
+        publicPath: 'dist/'
+    },
+    mode: 'none',
+    module: {
+        rules: [
+            {
+                test: /\.(png|jpg)$/,
+                type: 'asset',
+                parser: {
+                    dataUrlCondition: {
+                        maxSize: 3 * 1024
+                    }
+                }
+            },
+            {
+                test: /\.txt/,
+                type: 'asset/source'
+            },
+            {
+                test: /\.css$/,
+                use: [
+                    'style-loader', 'css-loader'
+                ]
+            },
+            {
+                test: /\.scss$/,
+                use: [
+                    'style-loader', 'css-loader', 'sass-loader'
+                ]
+            },
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        presets: [ '@babel/env' ],
+                        plugins: [ '@babel/plugin-proposal-class-properties' ]     // using this to enable using class variable. not all
+                                                                                  // browser support class variable. they support class method only
+                    }
+                }
+            }
+        ]
+    }
+};
+```
