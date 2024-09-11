@@ -426,6 +426,101 @@ module.exports = {
     ]
 };
 ```
+## Multiple page application and code splitting
+* we can create multiple output HTML with their own set of js and css files.
+* We can also create js-bundle files for those libraries which are common, so that we dont have to add the library in both js bundles.
+* Default if any library is more than 3kb, than only it create seperate file otherwise not.
+    * we need to add rule to optimize output to create seperate file, in that we can also mention file size, to check and create new file
+```js
+const path = require('path');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+module.exports = {
+    entry: {
+        'hello-world': './src/hello-world.js',           // createing two entry point for js
+        'kiwi': './src/kiwi.js'                          // hello-world and kiwi is [name], which we use later
+    },
+    output: {
+        filename: '[name].bundle.js',                    // output file name will be same as entry point name
+        path: path.resolve(__dirname, './dist'),
+        publicPath: ''
+    },
+     mode: 'production',
+    optimization: {                                        // optimization code to pull common library in one file
+        splitChunks: {
+            chunks: 'all',
+            minSize: 3000                                  // only create new file if the size is greater than 3kb, otherwise add the library in [name].bundle.js'
+        }
+    },
+    module: {
+        rules: [
+            {
+                test: /\.(png|jpg)$/,
+                type: 'asset',
+                parser: {
+                    dataUrlCondition: {
+                        maxSize: 3 * 1024
+                    }
+                }
+            },
+            {
+                test: /\.txt/,
+                type: 'asset/source'
+            },
+            {
+                test: /\.css$/,
+                use: [
+                    'style-loader', 'css-loader'
+                ]
+            },
+            {
+                test: /\.scss$/,
+                use: [
+                    'style-loader', 'css-loader', 'sass-loader'
+                ]
+            },
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        presets: [ '@babel/env' ],
+                        plugins: [ '@babel/plugin-proposal-class-properties' ]
+                    }
+                }
+            },
+            {
+                test: /\.hbs$/,
+                use: [
+                    'handlebars-loader'
+                ]
+            }
+        ]
+    },
+    plugins: [
+        new CleanWebpackPlugin(),
+        new HtmlWebpackPlugin({
+            filename: 'hello-world.html',
+            chunks: ['hello-world'],          // creating new html file whose starting poiint will be hello-world, which it will look from entry point
+            title: 'Hello world',
+            template: 'src/page-template.hbs',
+            description: 'Hello world',
+            minify: false
+        }),
+        new HtmlWebpackPlugin({
+            filename: 'kiwi.html',
+            chunks: ['kiwi'],
+            title: 'Kiwi',
+            template: 'src/page-template.hbs',
+            description: 'Kiwi',
+            minify: false
+        })
+    ]
+};
+```
+
 ## Extra
 * We can add hash to each file name for creating new file-name in case of any change file
   * for this we just need to add [contenthash] in file name ->
