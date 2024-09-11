@@ -345,7 +345,87 @@ module.exports = {
     ]
 };
 ```
+## webpack dev server
+* We can add server to host the build project in given port.
+```js
+const path = require('path');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+module.exports = {
+    entry: './src/index.js',
+    output: {
+        filename: 'bundle.js',
+        path: path.resolve(__dirname, './dist'),
+        publicPath: ''
+    },
+    mode: 'development',
+    devServer: {                                                // Server configuration
+        port: 9000,
+        static: {
+            directory: path.resolve(__dirname, './dist'),
+        },
+        devMiddleware: {
+            index: 'index.html',                               // Entr point
+            writeToDisk: true                                  // write the output file also in the output folder. Otherwise it will directly host the output.
+        }
+    },
+    module: {
+        rules: [
+            {
+                test: /\.(png|jpg)$/,
+                type: 'asset',
+                parser: {
+                    dataUrlCondition: {
+                        maxSize: 3 * 1024
+                    }
+                }
+            },
+            {
+                test: /\.txt/,
+                type: 'asset/source'
+            },
+            {
+                test: /\.css$/,
+                use: [
+                    'style-loader', 'css-loader'
+                ]
+            },
+            {
+                test: /\.scss$/,
+                use: [
+                    'style-loader', 'css-loader', 'sass-loader'
+                ]
+            },
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        presets: [ '@babel/env' ],
+                        plugins: [ '@babel/plugin-proposal-class-properties' ]
+                    }
+                }
+            },
+            {
+                test: /\.hbs$/,
+                use: [
+                    'handlebars-loader'
+                ]
+            }
+        ]
+    },
+    plugins: [
+        new CleanWebpackPlugin(),
+        new HtmlWebpackPlugin({
+            title: 'Hello world',
+            template: 'src/index.hbs',
+            description: 'some description'
+        })
+    ]
+};
+```
 ## Extra
 * We can add hash to each file name for creating new file-name in case of any change file
   * for this we just need to add [contenthash] in file name ->
@@ -356,4 +436,10 @@ module.exports = {
         publicPath: 'dist/'
     },
 ```
-* 
+* We can have multiplle config file. To use them we need to change script in package.json
+```js
+build : "webpack --config webpack.dev.config.js"
+```
+
+* we can add mode to webpack (dev or prod)
+  * we can check the current mode in js using ***process.env.NODE_ENV***
