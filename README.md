@@ -251,7 +251,7 @@ module.exports = {
             {
                 test: /\.scss$/,
                 use: [
-                    'style-loader', 'css-loader', 'sass-loader'
+                    'style-loader', 'css-loader', 'sass-loader'   // loader load from right to left-> first saas, then css then style
                 ]
             },
             {
@@ -270,3 +270,90 @@ module.exports = {
     }
 };
 ```
+### Plugins
+* plugins are additional js lib that do everything that loaders can do
+* They can also modify how the bundles themsleves are created.
+  * eg.  uglifyJSPlugin take the bundle.js and minimize the content to decrease size.
+* We can add plugin to create seperate file for sass and css called -> MiniCssExtractPlugin  (we need to change style-loader in rule also)
+
+
+```js
+const path = require('path');
+const TerserPlugin = require('terser-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+
+module.exports = {
+    entry: './src/index.js',
+    output: {
+        filename: 'bundle.[contenthash].js',
+        path: path.resolve(__dirname, './dist'),
+        publicPath: 'dist/'
+    },
+    mode: 'none',
+    module: {
+        rules: [
+            {
+                test: /\.(png|jpg)$/,
+                type: 'asset',
+                parser: {
+                    dataUrlCondition: {
+                        maxSize: 3 * 1024
+                    }
+                }
+            },
+            {
+                test: /\.txt/,
+                type: 'asset/source'
+            },
+            {
+                test: /\.css$/,
+                use: [
+                    MiniCssExtractPlugin.loader, 'css-loader'    //change loader also according to plugin
+                ]
+            },
+            {
+                test: /\.scss$/,
+                use: [
+                    MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'
+                ]
+            },
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        presets: [ '@babel/env' ],
+                        plugins: [ '@babel/plugin-proposal-class-properties' ]
+                    }
+                }
+            }
+        ]
+    },
+    plugins: [
+        new TerserPlugin(),
+        new MiniCssExtractPlugin({
+            filename: 'styles.[contenthash].css'
+        }),
+        new CleanWebpackPlugin({                             // new CleanWebpackPlugin() -> for default setting
+            cleanOnceBeforeBuildPatterns: [                  // if no option passsed it will clean output folder only
+                '**/*',                                      // configuring to clean output folder
+                path.join(process.cwd(), 'build/**/*')       // This will clean build folder also
+            ]
+        })
+    ]
+};
+```
+
+## Extra
+* We can add hash to each file name for creating new file-name in case of any change file
+  * for this we just need to add [contenthash] in file name ->
+```js
+ output: {
+        filename: 'bundle.[contenthash].js',
+        path: path.resolve(__dirname, './dist'),
+        publicPath: 'dist/'
+    },
+```
+* 
