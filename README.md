@@ -347,6 +347,7 @@ module.exports = {
 ```
 ## webpack dev server
 * We can add server to host the build project in given port.
+* dev: "webpack serve --config webpack.dev.config.js --hot"       // hot reload server config with webpack dev serve
 ```js
 const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
@@ -534,6 +535,7 @@ module.exports = {
 * We can have multiplle config file. To use them we need to change script in package.json
 ```js
 build : "webpack --config webpack.dev.config.js"
+dev: "webpack serve --config webpack.dev.config.js --hot"       // hot reload server config with webpack dev serve
 ```
 
 * we can add mode to webpack (dev or prod)
